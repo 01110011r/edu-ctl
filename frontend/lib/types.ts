@@ -20,8 +20,11 @@ export interface Teacher {
 export interface Student {
   id: number;
   user_id: number;
+  full_name: string;
+  email: string;
   phone: string;
   group_id: number | null;
+  group_name?: string | null;
   joined_at: string;
 }
 
@@ -36,6 +39,8 @@ export interface Group {
 export interface Lesson {
   id: number;
   group_id: number;
+  group_name: string;
+  teacher_name: string;
   weekday: number;
   start_time: string;
   end_time: string;
@@ -50,4 +55,32 @@ export interface Attendance {
   student_id: number;
   date: string;
   status: AttendanceStatus;
+}
+
+export interface AttendanceItem {
+  student_id: number;
+  student_name: string;
+  phone: string;
+  status: AttendanceStatus | null;
+}
+
+export interface AttendanceSummary {
+  present: number;
+  late: number;
+  absent: number;
+  percent: number;
+}
+
+export interface StudentAttendanceHistoryItem {
+  id: number;
+  date: string;
+  status: AttendanceStatus;
+  group_name: string;
+  start_time: string;
+  end_time: string;
+}
+
+export interface StudentAttendanceMeResponse {
+  history: StudentAttendanceHistoryItem[];
+  summary: AttendanceSummary;
 }
