@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import create_db_and_tables
-from app.routers import auth, students, teachers
+from app.routers import auth, groups, lessons, students, teachers
 
 
 @asynccontextmanager
@@ -38,6 +38,8 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(teachers.router, prefix="/api/teachers", tags=["teachers"])
 app.include_router(students.router, prefix="/api/students", tags=["students"])
+app.include_router(groups.router, prefix="/api/groups", tags=["groups"])
+app.include_router(lessons.router, prefix="/api/lessons", tags=["lessons"])
 
 
 @app.get("/api/health", tags=["health"])

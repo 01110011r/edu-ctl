@@ -1,6 +1,6 @@
 import datetime as dt
-from typing import Optional
-from pydantic import BaseModel, EmailStr
+from typing import List, Optional
+from pydantic import BaseModel, EmailStr, field_validator, model_validator
 
 
 class LoginRequest(BaseModel):
@@ -79,5 +79,103 @@ class StudentRead(BaseModel):
     group_id: Optional[int] = None
     group_name: Optional[str] = None
     joined_at: dt.date
+
+    model_config = {"from_attributes": True}
+
+
+# --- Group Schemas ---
+class GroupCreate(BaseModel):
+    name: str
+    subject: str
+    level: Optional[str] = None
+    teacher_id: int
+
+
+class GroupUpdate(BaseModel):
+    name: Optional[str] = None
+    subject: Optional[str] = None
+    level: Optional[str] = None
+    teacher_id: Optional[int] = None
+
+
+class GroupRead(BaseModel):
+    id: int
+    name: str
+    subject: str
+    level: Optional[str] = None
+    teacher_id: int
+    teacher_name: str
+    student_count: int
+
+    model_config = {"from_attributes": True}
+
+
+class GroupDetail(BaseModel):
+    id: int
+    name: str
+    subject: str
+    level: Optional[str] = None
+    teacher_id: int
+    teacher_name: str
+    student_count: int
+    teacher: TeacherRead
+    students: List[StudentRead]
+
+    model_config = {"from_attributes": True}
+
+
+# --- Lesson Schemas ---
+class LessonCreate(BaseModel):
+    group_id: int
+    weekday: int
+    start_time: str
+    end_time: str
+    room: str
+
+    @field_validator("weekday")
+    @classmethod
+    def validate_weekday(cls, v: int) -> int:
+        if v < 0 or v > 6:
+            raise ValueError("weekday must be between 0 (Monday) and 6 (Sunday)")
+        return v
+
+    @model_validator(mode="after")
+    def validate_times(self) -> "LessonCreate":
+        if self.end_time <= self.start_time:
+            raise ValueError("end_time must be after start_time")
+        return self
+
+
+class LessonUpdate(BaseModel):
+    group_id: Optional[int] = None
+    weekday: Optional[int] = None
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    room: Optional[str] = None
+
+    @field_validator("weekday")
+    @classmethod
+    def validate_weekday(cls, v: Optional[int]) -> Optional[int]:
+        if v is not None and (v < 0 or v > 6):
+            raise ValueError("weekday must be between 0 (Monday) and 6 (Sunday)")
+        return v
+
+    @model_validator(mode="after")
+    def validate_times(self) -> "LessonUpdate":
+        if self.start_time is not None and self.end_time is not None:
+            if self.end_time <= self.start_time:
+                raise ValueError("end_time must be after start_time")
+        return self
+
+
+class LessonRead(BaseModel):
+    id: int
+    group_id: int
+    group_name: str
+    teacher_name: str
+    weekday: int
+    start_time: str
+    end_time: str
+    room: str
 
     model_config = {"from_attributes": True}
