@@ -126,6 +126,6 @@ Logins (password for all: `demo1234`): `admin@demo.uz`, `teacher1@demo.uz`, `stu
 
 ## 10. Handoff (update after each session)
 
-- Done: Phase 1 backend setup (db.py, models.py, auth.py, schemas.py, main.py, routers/auth.py)
-- Next: Phase 2 backend routers (teachers, students, groups, lessons, attendance, dashboard) and seed.py
+- Done: Backend complete (auth, teachers, students, groups, lessons, attendance, dashboard, seed.py)
+- Next: Frontend development
 - Known bugs: —

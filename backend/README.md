@@ -42,6 +42,12 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+### 4. Seed demo data
+
+```bash
+python seed.py
+```
+
 ---
 
 ## ⚙️ Configuration (Optional)
