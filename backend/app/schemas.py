@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel, EmailStr, field_validator, model_validator
 
 
@@ -179,3 +179,130 @@ class LessonRead(BaseModel):
     room: str
 
     model_config = {"from_attributes": True}
+
+
+# --- Attendance Schemas ---
+class AttendanceItem(BaseModel):
+    student_id: int
+    student_name: str
+    phone: str
+    status: Optional[str] = None  # "present", "absent", "late", or None if not marked yet
+
+
+class AttendanceRecordIn(BaseModel):
+    student_id: int
+    status: str
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        val = v.lower().strip()
+        if val not in ("present", "absent", "late"):
+            raise ValueError("status must be 'present', 'absent', or 'late'")
+        return val
+
+
+class AttendanceBulkUpdate(BaseModel):
+    lesson_id: int
+    date: dt.date
+    records: List[AttendanceRecordIn]
+
+
+class StudentAttendanceHistoryItem(BaseModel):
+    id: int
+    date: dt.date
+    status: str
+    group_name: str
+    start_time: str
+    end_time: str
+
+
+class AttendanceSummary(BaseModel):
+    present: int
+    late: int
+    absent: int
+    percent: float
+
+
+class StudentAttendanceMeResponse(BaseModel):
+    history: List[StudentAttendanceHistoryItem]
+    summary: AttendanceSummary
+
+
+# --- Dashboard Schemas ---
+class AdminDashboardCounts(BaseModel):
+    teachers: int
+    students: int
+    groups: int
+    lessons_this_week: int
+
+
+class AdminDashboardResponse(BaseModel):
+    role: str = "admin"
+    counts: AdminDashboardCounts
+    today_lessons: List[LessonRead]
+
+
+class TeacherDashboardCounts(BaseModel):
+    groups: int
+    students: int
+
+
+class TeacherLessonToday(BaseModel):
+    id: int
+    group_id: int
+    group_name: str
+    teacher_name: str
+    weekday: int
+    start_time: str
+    end_time: str
+    room: str
+    attendance_marked: bool
+
+
+class TeacherDashboardResponse(BaseModel):
+    role: str = "teacher"
+    counts: TeacherDashboardCounts
+    today_lessons: List[TeacherLessonToday]
+
+
+class StudentUpcomingLesson(BaseModel):
+    id: int
+    group_id: int
+    group_name: str
+    teacher_name: str
+    weekday: int
+    start_time: str
+    end_time: str
+    room: str
+    date: dt.date
+
+
+class StudentDashboardGroup(BaseModel):
+    id: int
+    name: str
+    subject: str
+    level: Optional[str] = None
+
+
+class StudentDashboardTeacher(BaseModel):
+    id: int
+    full_name: str
+    email: str
+    phone: str
+    subject: str
+
+
+class StudentDashboardResponse(BaseModel):
+    role: str = "student"
+    group: Optional[StudentDashboardGroup] = None
+    teacher: Optional[StudentDashboardTeacher] = None
+    next_lessons: List[StudentUpcomingLesson]
+    attendance_summary: AttendanceSummary
+
+
+DashboardResponse = Union[
+    AdminDashboardResponse,
+    TeacherDashboardResponse,
+    StudentDashboardResponse,
+]
